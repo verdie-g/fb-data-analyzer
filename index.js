@@ -1,6 +1,14 @@
 const fs = require('fs').promises;
 const Path = require('path');
 
+function addOrDefault(obj, key, add, def) {
+  if (key in obj) {
+    obj[key] += add;
+  } else {
+    obj[key] = def;
+  }
+}
+
 function stringPart(str, n, sep) {
   const parts = str.split(sep);
   return parts[n < 0 ? parts.length + n : n];
@@ -19,11 +27,30 @@ function countByDiscussion(filename, data, out) {
   out[name] = data.messages.length;
 }
 
+function messageDistribution(filename, data, out) {
+  const name = stringPart(pathPart(filename, -2), 0, '_');
+  out[name] = {};
+
+  const countByParticipant = {};
+  data.messages.forEach((message) => { 
+    addOrDefault(countByParticipant, message.sender_name, 1, 0);
+  });
+
+  const total = Object.values(countByParticipant).reduce((acc, count) => acc += count, 0);
+  for (const [participant, count] of Object.entries(countByParticipant)) {
+    out[name][participant] = new Number(count * 100 / total).toFixed(2);
+  }
+}
+
 const analyzers = {
   'messages': [
     {
       name: 'countByDiscussion',
       func: countByDiscussion,
+    },
+    {
+      name: 'messageDistribution',
+      func: messageDistribution,
     },
   ],
 };

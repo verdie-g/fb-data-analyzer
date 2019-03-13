@@ -14,22 +14,9 @@ Node >= 10
 - `yarn install`
 - `node index.js facebook-json-folder`
 
-## Extract part of the result with [jq](https://stedolan.github.io/jq)
+## View json with [fx](http://fx.wtf)
 ```
-$ node index.js ./facebook-json-folder | jq '.messages.countPerYear'
-{
-  "2009": 18,
-  "2010": 96,
-  "2011": 1240,
-  "2012": 1396,
-  "2013": 8082,
-  "2014": 10175,
-  "2015": 16121,
-  "2016": 27954,
-  "2017": 66202,
-  "2018": 40198,
-  "2019": 4405
-}
+$ node index.js ./facebook-json-folder | fx
 ```
 
 ## How to delete facebook

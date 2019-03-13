@@ -38,13 +38,13 @@ function messageDistribution(filename, data, out) {
   });
 
   const total = Object.values(countByParticipant).reduce((acc, count) => acc += count, 0);
-  for (const [participant, count] of Object.entries(countByParticipant)) {
-    out[name][participant] = new Number(count * 100 / total).toFixed(2);
-  }
+  Object.entries(countByParticipant).forEach(([participant, count]) => {
+    out[name][participant] = count * 100 / total;
+  });
 }
 
 const analyzers = {
-  'messages': [
+  messages: [
     {
       name: 'countByDiscussion',
       func: countByDiscussion,
@@ -57,46 +57,46 @@ const analyzers = {
 };
 
 function messagesDataFormat(messagesData) {
-  messagesData.participants = messagesData.participants.map(participant =>
-    ({ name: decodeString(participant.name) })
-  );
+  messagesData.participants = messagesData.participants.map(participant => (
+    { name: decodeString(participant.name) }
+  ));
 
-  messagesData.messages = messagesData.messages.map(message =>
-    ({
+  messagesData.messages = messagesData.messages.map(message => (
+    {
       sender_name: decodeString(message.sender_name),
       date: new Date(message.timestamp_ms),
       content: message.content,
       type: message.type,
-    })
-  );
+    }
+  ));
 
   return messagesData;
 }
 
 const typesInfos = {
-  'messages': {
+  messages: {
     fileMatcher: { basePath: 'messages', pattern: /^message.json$/ },
     format: messagesDataFormat,
   },
 };
 
-async function findMatchingFiles(dir, pattern) {
+async function findMatchingFiles(baseDir, pattern) {
   const files = [];
 
   const traverse = async (dir) => {
     const list = await fs.readdir(dir, { withFileTypes: true });
 
-    for (let f of list) {
+    for (const f of list) {
       const cur = Path.join(dir, f.name);
       if (await f.isDirectory()) {
         await traverse(cur, pattern);
       } else if (pattern.test(f.name)) {
         files.push(cur);
       }
-    };
+    }
   };
 
-  await traverse(dir, pattern);
+  await traverse(baseDir, pattern);
   return files;
 }
 
@@ -108,34 +108,32 @@ if (process.argv.length <= 2) {
 const jsonDir = process.argv[2];
 
 (async () => {
+  const analyzes = {};
 
-const analyzes = {};
+  const fileProcessing = [];
 
-const fileProcessing = [];
+  for (const [type, typeAnalyzers] of Object.entries(analyzers)) {
+    analyzes[type] = {};
+    const typeInfos = typesInfos[type];
 
-for (const [type, typeAnalyzers] of Object.entries(analyzers)) {
-  analyzes[type] = {};
-  const typeInfos = typesInfos[type];
-
-  const analyzedDir = Path.join(jsonDir, typeInfos.fileMatcher.basePath);
-  const files = await findMatchingFiles(analyzedDir, typeInfos.fileMatcher.pattern);
-
-  typeAnalyzers.forEach((analyzer) => {
-    analyzes[type][analyzer.name] = {};
-  });
-
-  fileProcessing.push(...files.map(async (file) => {
-    const content = JSON.parse(await fs.readFile(file));
-    const formatedContent = typeInfos.format(content);
+    const analyzedDir = Path.join(jsonDir, typeInfos.fileMatcher.basePath);
+    const files = await findMatchingFiles(analyzedDir, typeInfos.fileMatcher.pattern);
 
     typeAnalyzers.forEach((analyzer) => {
-      const analysisOutput = analyzes[type][analyzer.name];
-      analyzer.func(file, formatedContent, analysisOutput);
+      analyzes[type][analyzer.name] = {};
     });
-  }));
-}
 
-await Promise.all(fileProcessing);
-console.log(JSON.stringify(analyzes, null, 2));
+    fileProcessing.push(...files.map(async (file) => {
+      const content = JSON.parse(await fs.readFile(file));
+      const formatedContent = typeInfos.format(content);
 
+      typeAnalyzers.forEach((analyzer) => {
+        const analysisOutput = analyzes[type][analyzer.name];
+        analyzer.func(file, formatedContent, analysisOutput);
+      });
+    }));
+  }
+
+  await Promise.all(fileProcessing);
+  console.log(JSON.stringify(analyzes, null, 2));
 })();

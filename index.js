@@ -1,84 +1,22 @@
 const fs = require('fs').promises;
 const Path = require('path');
-const utf8 = require('utf8');
-
-function addOrDefault(obj, key, add, def) {
-  if (key in obj) {
-    obj[key] += add;
-  } else {
-    obj[key] = def;
-  }
-}
-
-function decodeString(str) {
-  return utf8.decode(str);
-}
-
-function stringPart(str, n, sep) {
-  const parts = str.split(sep);
-  return parts[n < 0 ? parts.length + n : n];
-}
-
-function pathPart(path, n) {
-  return stringPart(path, n, Path.sep);
-}
 
 function countByDiscussion(filename, data, out) {
-  const name = stringPart(pathPart(filename, -2), 0, '_');
+  const name = stringPart(dirname(filename), 0, '_');
   out[name] = data.messages.length;
 }
 
-function messageDistribution(filename, data, out) {
-  const name = stringPart(pathPart(filename, -2), 0, '_');
-  out[name] = {};
-
-  const countByParticipant = {};
-  data.messages.forEach((message) => {
-    addOrDefault(countByParticipant, message.sender_name, 1, 0);
-  });
-
-  const total = Object.values(countByParticipant).reduce((acc, count) => acc += count, 0);
-  Object.entries(countByParticipant).forEach(([participant, count]) => {
-    out[name][participant] = count * 100 / total;
-  });
-}
-
 const analyzers = {
-  messages: [
-    {
-      name: 'countByDiscussion',
-      func: countByDiscussion,
-    },
-    {
-      name: 'messageDistribution',
-      func: messageDistribution,
-    },
-  ],
-};
-
-function messagesDataFormat(messagesData) {
-  messagesData.participants = messagesData.participants.map(participant => (
-    { name: decodeString(participant.name) }
-  ));
-
-  messagesData.messages = messagesData.messages.map(message => (
-    {
-      sender_name: decodeString(message.sender_name),
-      date: new Date(message.timestamp_ms),
-      content: message.content,
-      type: message.type,
-    }
-  ));
-
-  return messagesData;
-}
-
-const typesInfos = {
   messages: {
-    fileMatcher: { basePath: 'messages', pattern: /^message.json$/ },
-    format: messagesDataFormat,
+    countByDiscussion: require('./analyzers/messages-count-by-discussion'),
+    distribution: require('./analyzers/messages-distribution'),
   },
 };
+
+const analyzerTypesInfos = Object.keys(analyzers).reduce((infos, typeName) => {
+  infos[typeName] = require(`./analyzer-types/${typeName}`);
+  return infos;
+}, {});
 
 async function findMatchingFiles(baseDir, pattern) {
   const files = [];
@@ -114,22 +52,22 @@ const jsonDir = process.argv[2];
 
   for (const [type, typeAnalyzers] of Object.entries(analyzers)) {
     analyzes[type] = {};
-    const typeInfos = typesInfos[type];
+    const typeInfos = analyzerTypesInfos[type];
 
     const analyzedDir = Path.join(jsonDir, typeInfos.fileMatcher.basePath);
     const files = await findMatchingFiles(analyzedDir, typeInfos.fileMatcher.pattern);
 
-    typeAnalyzers.forEach((analyzer) => {
-      analyzes[type][analyzer.name] = {};
+    Object.keys(typeAnalyzers).forEach((analyzerName) => {
+      analyzes[type][analyzerName] = {};
     });
 
     fileProcessing.push(...files.map(async (file) => {
       const content = JSON.parse(await fs.readFile(file));
       const formatedContent = typeInfos.format(content);
 
-      typeAnalyzers.forEach((analyzer) => {
-        const analysisOutput = analyzes[type][analyzer.name];
-        analyzer.func(file, formatedContent, analysisOutput);
+      Object.entries(typeAnalyzers).forEach(([analyzerName, analyzerFunc]) => {
+        const analysisOutput = analyzes[type][analyzerName];
+        analyzerFunc(file, formatedContent, analysisOutput);
       });
     }));
   }

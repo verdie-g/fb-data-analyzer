@@ -5,13 +5,13 @@ function commentsDataFormat(commentsData) {
     {
       date: new Date(comment.timestamp * 1000),
       title: decodeString(comment.title),
-      data: comment.data.map(data => {console.log(data); return (
+      data: comment.data.map(data => (
         {
           date: new Date(data.comment.timestamp * 1000),
           // comment: decodeString(data.comment), FIXME
           author: decodeString(data.comment.author),
         }
-      ); }),
+     )),
     }
   ));
 

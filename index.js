@@ -1,5 +1,6 @@
 const fs = require('fs').promises;
 const Path = require('path');
+const utf8 = require('utf8');
 
 function addOrDefault(obj, key, add, def) {
   if (key in obj) {
@@ -9,6 +10,10 @@ function addOrDefault(obj, key, add, def) {
   }
 }
 
+function decodeString(str) {
+  return utf8.decode(str);
+}
+
 function stringPart(str, n, sep) {
   const parts = str.split(sep);
   return parts[n < 0 ? parts.length + n : n];
@@ -16,10 +21,6 @@ function stringPart(str, n, sep) {
 
 function pathPart(path, n) {
   return stringPart(path, n, Path.sep);
-}
-
-function unescapeUnicodeString(str) {
-  return decodeURIComponent(JSON.parse(`"${str}"`));
 }
 
 function countByDiscussion(filename, data, out) {
@@ -57,12 +58,12 @@ const analyzers = {
 
 function messagesDataFormat(messagesData) {
   messagesData.participants = messagesData.participants.map(participant =>
-    ({ name: unescapeUnicodeString(participant.name) })
+    ({ name: decodeString(participant.name) })
   );
 
   messagesData.messages = messagesData.messages.map(message =>
     ({
-      sender_name: unescapeUnicodeString(message.sender_name),
+      sender_name: decodeString(message.sender_name),
       date: new Date(message.timestamp_ms),
       content: message.content,
       type: message.type,

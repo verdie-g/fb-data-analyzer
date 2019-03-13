@@ -7,6 +7,9 @@ const analyzers = {
     distribution: require('./analyzers/messages-distribution'),
     countPerYear: require('./analyzers/messages-count-per-year'),
   },
+  friends: {
+    newPerYear: require('./analyzers/friends-new-per-year'),
+  },
 };
 
 const analyzerTypesInfos = Object.keys(analyzers).reduce((infos, typeName) => {

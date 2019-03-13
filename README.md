@@ -14,7 +14,39 @@ Node >= 10
 - `yarn install`
 - `node index.js facebook-json-folder`
 
+## Example output
+
+```json
+{
+  "messages": {
+    "countByDiscussion": {
+      ...
+      "friend #2": 10357,
+      "friend #1": 12329,
+      "group of friends": 15875,
+      "thot": 47568
+    },
+    "countPerYear": {
+      "2017": 66202,
+      "2018": 40198,
+      "2019": 4405
+    },
+    ...
+  },
+  "friends": {
+    "newPerYear": {
+      "2016": 44,
+      "2017": 10,
+      "2018": 21,
+      "2019": 4
+    },
+    ...
+  }
+}
+```
+
 ## View json with [fx](http://fx.wtf)
+
 ```
 $ node index.js ./facebook-json-folder | fx
 ```

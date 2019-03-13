@@ -10,6 +10,9 @@ const analyzers = {
   friends: {
     newPerYear: require('./analyzers/friends-new-per-year'),
   },
+  comments: {
+    countPerYear: require('./analyzers/comments-count-per-year'),
+  },
 };
 
 const analyzerTypesInfos = Object.keys(analyzers).reduce((infos, typeName) => {

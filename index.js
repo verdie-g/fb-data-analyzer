@@ -33,7 +33,7 @@ function messageDistribution(filename, data, out) {
   out[name] = {};
 
   const countByParticipant = {};
-  data.messages.forEach((message) => { 
+  data.messages.forEach((message) => {
     addOrDefault(countByParticipant, message.sender_name, 1, 0);
   });
 
@@ -130,7 +130,7 @@ for (const [type, typeAnalyzers] of Object.entries(analyzers)) {
 
     typeAnalyzers.forEach((analyzer) => {
       const analysisOutput = analyzes[type][analyzer.name];
-      analyzer.func(file, content, analysisOutput);
+      analyzer.func(file, formatedContent, analysisOutput);
     });
   }));
 }

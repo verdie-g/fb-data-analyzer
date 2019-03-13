@@ -2,7 +2,9 @@
   "extends": "airbnb-base",
   "rules": {
     "indent": ["error", 2],
+    "global-require": "off",
     "no-await-in-loop": "off",
+    "import/no-dynamic-require": "off",
     "no-param-reassign": "off",
     "no-return-assign": "off"
   }

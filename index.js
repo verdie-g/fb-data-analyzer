@@ -1,11 +1,6 @@
 const fs = require('fs').promises;
 const Path = require('path');
 
-function countByDiscussion(filename, data, out) {
-  const name = stringPart(dirname(filename), 0, '_');
-  out[name] = data.messages.length;
-}
-
 const analyzers = {
   messages: {
     countByDiscussion: require('./analyzers/messages-count-by-discussion'),

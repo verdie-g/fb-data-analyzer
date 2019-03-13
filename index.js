@@ -10,6 +10,7 @@ const analyzers = {
   messages: {
     countByDiscussion: require('./analyzers/messages-count-by-discussion'),
     distribution: require('./analyzers/messages-distribution'),
+    countPerYear: require('./analyzers/messages-count-per-year'),
   },
 };
 

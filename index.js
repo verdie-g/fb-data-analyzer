@@ -67,9 +67,10 @@ const jsonDir = process.argv[2];
       const content = JSON.parse(await fs.readFile(file));
       const formatedContent = typeInfos.format(content);
 
+      const ctx = { path: file, myName: '' };
       Object.entries(typeAnalyzers).forEach(([analyzerName, analyzerFunc]) => {
         const analysisOutput = analyzes[type][analyzerName];
-        analyzerFunc(file, formatedContent, analysisOutput);
+        analyzerFunc(ctx, formatedContent, analysisOutput);
       });
     }));
   }

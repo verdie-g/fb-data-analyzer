@@ -7,4 +7,6 @@ module.exports = {
     const parts = str.split(sep);
     return parts[n < 0 ? parts.length + n : n];
   },
+
+  unaccent: str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, ''),
 };

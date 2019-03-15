@@ -1,11 +1,13 @@
 {
   "extends": "airbnb-base",
   "rules": {
-    "indent": ["error", 2],
+    "array-callback-return": "off",
     "global-require": "off",
-    "no-await-in-loop": "off",
     "import/no-dynamic-require": "off",
+    "indent": ["error", 2],
+    "no-await-in-loop": "off",
     "no-param-reassign": "off",
-    "no-return-assign": "off"
+    "no-return-assign": "off",
+    "no-shadow": "off"
   }
 }

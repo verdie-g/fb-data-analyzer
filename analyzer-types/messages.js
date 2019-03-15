@@ -9,7 +9,7 @@ function messagesDataFormat(messagesData) {
     {
       sender_name: decodeString(message.sender_name),
       date: new Date(message.timestamp_ms),
-      content: message.content,
+      content: message.content ? decodeString(message.content) : '',
       type: message.type,
     }
   ));

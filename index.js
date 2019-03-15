@@ -1,11 +1,14 @@
 const fs = require('fs').promises;
 const Path = require('path');
 
+const { decodeString } = require('./helpers/string');
+
 const analyzers = {
   messages: {
     countByDiscussion: require('./analyzers/messages-count-by-discussion'),
     distribution: require('./analyzers/messages-distribution'),
     countPerYear: require('./analyzers/messages-count-per-year'),
+    mostUsedWords: require('./analyzers/messages-most-used-words'),
   },
   friends: {
     newPerYear: require('./analyzers/friends-new-per-year'),
@@ -40,6 +43,16 @@ async function findMatchingFiles(baseDir, pattern) {
   return files;
 }
 
+async function readJsonFile(path) {
+  return JSON.parse(await fs.readFile(path));
+}
+
+async function getFullName(jsonDir) {
+  const profileInfoPath = Path.join(jsonDir, 'profile_information/profile_information.json');
+  const profileInfo = await readJsonFile(profileInfoPath);
+  return decodeString(profileInfo.profile.name.full_name);
+}
+
 if (process.argv.length <= 2) {
   console.error(`usage: node ${process.argv[1]} <json_dir>`);
   process.exit(1);
@@ -48,6 +61,8 @@ if (process.argv.length <= 2) {
 const jsonDir = process.argv[2];
 
 (async () => {
+  const fullName = await getFullName(jsonDir);
+
   const analyzes = {};
 
   const fileProcessing = [];
@@ -64,10 +79,10 @@ const jsonDir = process.argv[2];
     });
 
     fileProcessing.push(...files.map(async (file) => {
-      const content = JSON.parse(await fs.readFile(file));
+      const content = await readJsonFile(file);
       const formatedContent = typeInfos.format(content);
 
-      const ctx = { path: file, myName: '' };
+      const ctx = { path: file, fullName };
       Object.entries(typeAnalyzers).forEach(([analyzerName, analyzerFunc]) => {
         const analysisOutput = analyzes[type][analyzerName];
         analyzerFunc(ctx, formatedContent, analysisOutput);

@@ -4,7 +4,8 @@ Generate an analyse in JSON of your Facebook activity.
 
 ## Requirements
 
-Node >= 10
+- Node >= 10
+- yarn
 
 ## Usage
 
@@ -65,7 +66,7 @@ Node >= 10
 $ node index.js ./facebook-json-folder | fx
 ```
 
-## How to delete facebook
+## How to delete Facebook
 
 [facebook.com/help/delete_account](https://www.facebook.com/help/delete_account)
 

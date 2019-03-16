@@ -59,18 +59,9 @@ async function getFullName(jsonDir) {
   return decodeString(profileInfo.profile.name.full_name);
 }
 
-if (process.argv.length <= 2) {
-  console.error(`usage: node ${process.argv[1]} <json_dir>`);
-  process.exit(1);
-}
-
-const jsonDir = process.argv[2];
-
-(async () => {
+async function analyze(jsonDir) {
   const fullName = await getFullName(jsonDir);
-
   const analyzes = {};
-
   const fileProcessing = [];
 
   for (const [type, typeAnalyzers] of Object.entries(analyzers)) {
@@ -97,5 +88,17 @@ const jsonDir = process.argv[2];
   }
 
   await Promise.all(fileProcessing);
+  return analyzes;
+}
+
+if (process.argv.length <= 2) {
+  console.error(`usage: node ${process.argv[1]} <json_dir>`);
+  process.exit(1);
+}
+
+const jsonDir = process.argv[2];
+
+(async () => {
+  const analyzes = await analyze(jsonDir);
   console.log(JSON.stringify(analyzes, null, 2));
 })();

@@ -16,6 +16,9 @@ const analyzers = {
   comments: {
     countPerYear: require('./analyzers/comments-count-per-year'),
   },
+  reactions: {
+    countPerYear: require('./analyzers/reactions-count-per-year'),
+  },
 };
 
 const analyzerTypesInfos = Object.keys(analyzers).reduce((infos, typeName) => {

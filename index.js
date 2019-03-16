@@ -19,6 +19,9 @@ const analyzers = {
   reactions: {
     countPerYear: require('./analyzers/reactions-count-per-year'),
   },
+  locations: {
+    visitsPerYear: require('./analyzers/locations-visits-per-year'),
+  },
 };
 
 const analyzerTypesInfos = Object.keys(analyzers).reduce((infos, typeName) => {

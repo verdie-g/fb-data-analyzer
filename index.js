@@ -35,14 +35,17 @@ async function findMatchingFiles(baseDir, pattern) {
   const traverse = async (dir) => {
     const list = await fs.readdir(dir, { withFileTypes: true });
 
-    for (const f of list) {
-      const cur = Path.join(dir, f.name);
-      if (await f.isDirectory()) {
-        await traverse(cur, pattern);
-      } else if (pattern.test(f.name)) {
+    const traversePromises = [];
+    list.forEach((file) => {
+      const cur = Path.join(dir, file.name);
+      if (file.isDirectory()) {
+        traversePromises.push(traverse(cur, pattern));
+      } else if (pattern.test(file.name)) {
         files.push(cur);
       }
-    }
+    });
+
+    await Promise.all(traversePromises);
   };
 
   await traverse(baseDir, pattern);

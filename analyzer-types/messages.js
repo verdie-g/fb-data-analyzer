@@ -7,7 +7,7 @@ function messagesDataFormat(messagesData) {
 
   messagesData.messages = messagesData.messages.map(message => (
     {
-      sender_name: decodeString(message.sender_name),
+      sender_name: message.sender_name ? decodeString(message.sender_name) : 'unknown',
       date: new Date(message.timestamp_ms),
       content: message.content ? decodeString(message.content) : '',
       type: message.type,
